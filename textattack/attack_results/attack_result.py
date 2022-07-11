@@ -49,34 +49,48 @@ class AttackResult(ABC):
 
         Helper method.
         """
-        return self.original_result.attacked_text.printable_text(
-            key_color=("bold", "underline"), key_color_method=color_method
-        )
+        try:
+            return self.original_result.attacked_text.printable_text(
+                key_color=("bold", "underline"), key_color_method=color_method
+            )
+        except Exception:
+            pass
+
 
     def perturbed_text(self, color_method=None):
         """Returns the text portion of `self.perturbed_result`.
 
         Helper method.
         """
-        return self.perturbed_result.attacked_text.printable_text(
-            key_color=("bold", "underline"), key_color_method=color_method
-        )
+        try:
+            return self.perturbed_result.attacked_text.printable_text(
+                key_color=("bold", "underline"), key_color_method=color_method
+            )
+        except Exception:
+            pass
 
     def str_lines(self, color_method=None):
-        """A list of the lines to be printed for this result's string
-        representation."""
-        lines = [self.goal_function_result_str(color_method=color_method)]
-        lines.extend(self.diff_color(color_method))
-        return lines
+        try:
+            """A list of the lines to be printed for this result's string
+                    representation."""
+            lines = [self.goal_function_result_str(color_method=color_method)]
+            lines.extend(self.diff_color(color_method))
+            return lines
+        except Exception:
+            print("error")
+
 
     def __str__(self, color_method=None):
         return "\n\n".join(self.str_lines(color_method=color_method))
 
     def goal_function_result_str(self, color_method=None):
-        """Returns a string illustrating the results of the goal function."""
-        orig_colored = self.original_result.get_colored_output(color_method)
-        pert_colored = self.perturbed_result.get_colored_output(color_method)
-        return orig_colored + " --> " + pert_colored
+        try:
+            """Returns a string illustrating the results of the goal function."""
+            orig_colored = self.original_result.get_colored_output(color_method)
+            pert_colored = self.perturbed_result.get_colored_output(color_method)
+            return orig_colored + " --> " + pert_colored
+        except Exception:
+            print("error")
 
     def diff_color(self, color_method=None):
         try:
