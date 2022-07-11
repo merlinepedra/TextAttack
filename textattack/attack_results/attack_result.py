@@ -79,59 +79,63 @@ class AttackResult(ABC):
         return orig_colored + " --> " + pert_colored
 
     def diff_color(self, color_method=None):
-        """Highlights the difference between two texts using color.
+        try:
+            """Highlights the difference between two texts using color.
 
-        Has to account for deletions and insertions from original text to
-        perturbed. Relies on the index map stored in
-        ``self.original_result.attacked_text.attack_attrs["original_index_map"]``.
-        """
-        t1 = self.original_result.attacked_text
-        t2 = self.perturbed_result.attacked_text
+                    Has to account for deletions and insertions from original text to
+                    perturbed. Relies on the index map stored in
+                    ``self.original_result.attacked_text.attack_attrs["original_index_map"]``.
+                    """
+            t1 = self.original_result.attacked_text
+            t2 = self.perturbed_result.attacked_text
 
-        if detect(t1.text) == "zh-cn" or detect(t1.text) == "ko":
-            return t1.printable_text(), t2.printable_text()
+            if detect(t1.text) == "zh-cn" or detect(t1.text) == "ko":
+                return t1.printable_text(), t2.printable_text()
 
-        if color_method is None:
-            return t1.printable_text(), t2.printable_text()
+            if color_method is None:
+                return t1.printable_text(), t2.printable_text()
 
-        color_1 = self.original_result.get_text_color_input()
-        color_2 = self.perturbed_result.get_text_color_perturbed()
+            color_1 = self.original_result.get_text_color_input()
+            color_2 = self.perturbed_result.get_text_color_perturbed()
 
-        # iterate through and count equal/unequal words
-        words_1_idxs = []
-        t2_equal_idxs = set()
-        original_index_map = t2.attack_attrs["original_index_map"]
-        for t1_idx, t2_idx in enumerate(original_index_map):
-            if t2_idx == -1:
-                # add words in t1 that are not in t2
-                words_1_idxs.append(t1_idx)
-            else:
-                w1 = t1.words[t1_idx]
-                w2 = t2.words[t2_idx]
-                if w1 == w2:
-                    t2_equal_idxs.add(t2_idx)
-                else:
+            # iterate through and count equal/unequal words
+            words_1_idxs = []
+            t2_equal_idxs = set()
+            original_index_map = t2.attack_attrs["original_index_map"]
+            for t1_idx, t2_idx in enumerate(original_index_map):
+                if t2_idx == -1:
+                    # add words in t1 that are not in t2
                     words_1_idxs.append(t1_idx)
+                else:
+                    w1 = t1.words[t1_idx]
+                    w2 = t2.words[t2_idx]
+                    if w1 == w2:
+                        t2_equal_idxs.add(t2_idx)
+                    else:
+                        words_1_idxs.append(t1_idx)
 
-        # words to color in t2 are all the words that didn't have an equal,
-        # mapped word in t1
-        words_2_idxs = list(sorted(set(range(t2.num_words)) - t2_equal_idxs))
+            # words to color in t2 are all the words that didn't have an equal,
+            # mapped word in t1
+            words_2_idxs = list(sorted(set(range(t2.num_words)) - t2_equal_idxs))
 
-        # make lists of colored words
-        words_1 = [t1.words[i] for i in words_1_idxs]
-        words_1 = [utils.color_text(w, color_1, color_method) for w in words_1]
-        words_2 = [t2.words[i] for i in words_2_idxs]
-        words_2 = [utils.color_text(w, color_2, color_method) for w in words_2]
+            # make lists of colored words
+            words_1 = [t1.words[i] for i in words_1_idxs]
+            words_1 = [utils.color_text(w, color_1, color_method) for w in words_1]
+            words_2 = [t2.words[i] for i in words_2_idxs]
+            words_2 = [utils.color_text(w, color_2, color_method) for w in words_2]
 
-        t1 = self.original_result.attacked_text.replace_words_at_indices(
-            words_1_idxs, words_1
-        )
-        t2 = self.perturbed_result.attacked_text.replace_words_at_indices(
-            words_2_idxs, words_2
-        )
+            t1 = self.original_result.attacked_text.replace_words_at_indices(
+                words_1_idxs, words_1
+            )
+            t2 = self.perturbed_result.attacked_text.replace_words_at_indices(
+                words_2_idxs, words_2
+            )
 
-        key_color = ("bold", "underline")
-        return (
-            t1.printable_text(key_color=key_color, key_color_method=color_method),
-            t2.printable_text(key_color=key_color, key_color_method=color_method),
-        )
+            key_color = ("bold", "underline")
+            return (
+                t1.printable_text(key_color=key_color, key_color_method=color_method),
+                t2.printable_text(key_color=key_color, key_color_method=color_method),
+            )
+        except Exception:
+            print("error")
+
